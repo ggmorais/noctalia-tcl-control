@@ -14,6 +14,7 @@
   "high": "Alta",
   "connected": "Conectado ao TCL Home",
   "pending": "Aguardando confirmação do aparelho…",
+  "temperature_queued": "Ajustando temperatura… envia ao parar de clicar.",
   "updated": "Atualizado às",
   "processing": "Processando…",
   "refresh": "Consultar estado",

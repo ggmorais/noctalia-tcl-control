@@ -14,6 +14,7 @@
   "high": "High",
   "connected": "Connected to TCL Home",
   "pending": "Waiting for device confirmation…",
+  "temperature_queued": "Choosing temperature… sends when you stop clicking.",
   "updated": "Updated at",
   "processing": "Processing…",
   "refresh": "Refresh state",

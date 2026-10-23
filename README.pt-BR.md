@@ -40,6 +40,13 @@ Você terá liga/desliga, temperatura (16–30 °C), modos, ventilação e visor
 Comandos só são enviados quando você usa os controles. O painel mostra o estado
 reportado separadamente de comandos aguardando confirmação do aparelho.
 
+Os botões **+ e −** mostram a temperatura escolhida imediatamente e enviam um único
+comando **800 ms após o último clique**. Você pode continuar ajustando durante um
+envio: somente o último valor escolhido será enviado em seguida, sem solicitações
+concorrentes. Ao fechar o painel, o ajuste restante é enviado sem esperar o prazo
+(ou após o envio em andamento terminar). Desativar/recarregar o plugin cancela
+rascunhos ainda não enviados; erros não causam repetição automática dos comandos.
+
 ## Credenciais e segurança
 
 - Credenciais em `~/.config/tcl-control/credentials.env` (ou `$XDG_CONFIG_HOME`),

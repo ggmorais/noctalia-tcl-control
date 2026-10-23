@@ -11,6 +11,8 @@ bar, without Alexa or Home Assistant.
 
 - Power, target temperature (16–30 °C), mode, fan speed and AC display controls.
 - Room temperature and reported device state.
+- Responsive temperature preview: rapid +/− clicks are grouped into one command
+  **800 ms after the last click**, instead of one cloud request per degree.
 - Pending commands stay separate from device-confirmed state.
 - A control-center shortcut, a popup panel, and an optional bar widget.
 - English and Portuguese interface.
@@ -112,6 +114,13 @@ after an explicit user action. Auth tokens are **memory-only**. State is polled
 every 60 seconds, with a follow-up after 3 seconds for a command. A refresh button
 is available. Credentials are reloaded when the session renews (10 minutes).
 
+Temperature changes are previewed locally while clicking. You can keep adjusting
+while a temperature request is in flight; only the latest queued target is sent
+next, with no concurrent requests. Closing the panel sends any remaining chosen
+temperature immediately (or after the active request finishes). Exiting/reloading
+the plugin cancels an unsent draft. A failed request cancels queued edits rather
+than silently retrying. The other controls are not debounced.
+
 - Cloud acceptance is **not physical-device confirmation**. Offline devices,
   stale shadows, API errors and network delays can leave a command pending.
 - Mode and fan mappings follow the reference integration's split-AC protocol.
@@ -159,12 +168,15 @@ python3 -m venv .venv
 .venv/bin/python -m pip install -r tcl-control/backend/requirements.txt
 .venv/bin/python -m unittest discover -s tcl-control/backend -v
 .venv/bin/python -m unittest discover -s tests -v
+lua tests/test_panel.lua
 noctalia plugins lint tcl-control
 ```
 
 Tests use simulated API responses, including real boto3 clients with botocore
 Stubber. They require no TCL account and send no device commands. GitHub Actions
-runs the Python tests and package checks. Integration changes should first be
+runs the Python tests, package checks and panel behavior tests (Lua 5.4+).
+The panel uses the common Lua/Luau subset; its behavior tests execute the actual
+script against a fake Noctalia host, clock and cloud. Integration changes should first be
 tested with read-only queries.
 
 ## Credits

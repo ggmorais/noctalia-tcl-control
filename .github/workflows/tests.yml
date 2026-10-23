@@ -8,6 +8,14 @@ permissions:
   contents: read
 
 jobs:
+  panel:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get update
+      - run: sudo apt-get install --no-install-recommends -y lua5.4
+      - run: lua5.4 tests/test_panel.lua
+
   python:
     runs-on: ubuntu-latest
     strategy:
