@@ -1,0 +1,30 @@
+id = "ggmorais/tcl-control"
+name = "TCL Home AC"
+version = "1.0.0"
+plugin_api = 24
+author = "ggmorais"
+license = "MIT"
+icon = "air-conditioning"
+description = "Control a TCL Home split air conditioner from Noctalia."
+tags = ["smart-home", "air-conditioning", "tcl"]
+dependencies = ["python3"]
+
+[[service]]
+id = "connection"
+entry = "service.luau"
+
+[[shortcut]]
+id = "ac"
+entry = "shortcut.luau"
+
+[[panel]]
+id = "controls"
+entry = "panel.luau"
+width = 430
+height = 490
+placement = "floating"
+position = "top_right"
+
+[[widget]]
+id = "bar"
+entry = "widget.luau"

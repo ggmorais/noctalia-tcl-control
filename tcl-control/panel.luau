@@ -1,0 +1,89 @@
+--!nonstrict
+local dataHome = noctalia.getenv("XDG_DATA_HOME") or noctalia.expandPath("~/.local/share")
+local python = dataHome .. "/tcl-control/venv/bin/python"
+local helper = noctalia.pluginDir() .. "/backend/backend.py"
+local busy = false
+local last = noctalia.state.get("status") or { ok = false, error = noctalia.tr("connecting") }
+local modeLabels = { noctalia.tr("auto"), noctalia.tr("cool"), noctalia.tr("dry"), noctalia.tr("fan"), noctalia.tr("heat") }
+local modeValues = { "auto", "cool", "dry", "fan", "heat" }
+local fanLabels = { noctalia.tr("auto"), noctalia.tr("low"), noctalia.tr("mid_low"), noctalia.tr("medium"), noctalia.tr("mid_high"), noctalia.tr("high") }
+local fanValues = { "0", "2", "3", "4", "5", "6" }
+
+local function render()
+  local s = last.state or {}
+  local pending = last.pending and next(last.pending) ~= nil
+  local enabled = last.ok == true and not busy and not pending
+  local fanIndex = 0
+  for i, value in ipairs(fanValues) do
+    if tonumber(value) == s.windSpeed then fanIndex = i - 1 end
+  end
+  local status = last.error or noctalia.tr("connected")
+  if last.ok then
+    status = pending and noctalia.tr("pending") or (noctalia.tr("updated") .. " " .. os.date("%H:%M", last.fetched_at))
+  end
+  if busy then status = noctalia.tr("processing") end
+  panel.render(ui.column({ gap = 16, flexGrow = 1 }, {
+    ui.row({ gap = 8, align = "center" }, {
+      ui.glyph({ name = "air-conditioning", size = 24, color = "primary" }),
+      ui.label({ text = noctalia.tr("title"), fontSize = 18, fontWeight = "bold", flexGrow = 1 }),
+      ui.button({ glyph = "refresh", onClick = "refresh", enabled = not busy, tooltip = noctalia.tr("refresh") }),
+      ui.button({ glyph = "close", onClick = "closePanel" }),
+    }),
+    ui.row({ align = "center", gap = 12 }, {
+      ui.label({ text = last.ok and (s.powerSwitch == 1 and noctalia.tr("on") or noctalia.tr("off")) or "—", flexGrow = 1 }),
+      ui.toggle({ key = "power", checked = s.powerSwitch == 1, enabled = enabled, onChange = "power" }),
+    }),
+    ui.column({ gap = 8, padding = 16, radius = 12, fill = "surface_variant" }, {
+      ui.label({ text = noctalia.tr("target_temperature"), color = "on_surface_variant" }),
+      ui.row({ gap = 16, align = "center", justify = "space_between" }, {
+        ui.button({ glyph = "minus", onClick = "cooler", enabled = enabled and (s.targetTemperature or 16) > 16 }),
+        ui.label({ text = tostring(s.targetTemperature or "—") .. " °C", fontSize = 36, fontWeight = "bold", color = "primary" }),
+        ui.button({ glyph = "plus", onClick = "warmer", enabled = enabled and (s.targetTemperature or 30) < 30 }),
+      }),
+      ui.label({ text = noctalia.tr("room_temperature") .. ": " .. tostring(s.currentTemperature or "—") .. " °C", color = "on_surface_variant" }),
+    }),
+    ui.row({ gap = 12, align = "center" }, {
+      ui.label({ text = noctalia.tr("mode"), width = 90 }),
+      ui.select({ key = "mode", options = modeLabels, selectedIndex = s.workMode or 0, enabled = enabled, onChange = "mode", flexGrow = 1 }),
+    }),
+    ui.row({ gap = 12, align = "center" }, {
+      ui.label({ text = noctalia.tr("fan_speed"), width = 90 }),
+      ui.select({ key = "fan", options = fanLabels, selectedIndex = fanIndex, enabled = enabled, onChange = "fan", flexGrow = 1 }),
+    }),
+    ui.row({ gap = 12, align = "center" }, {
+      ui.label({ text = noctalia.tr("screen"), flexGrow = 1 }),
+      ui.toggle({ key = "screen", checked = s.screen == 1, enabled = enabled, onChange = "screen" }),
+    }),
+    ui.label({ text = status, color = last.ok and "on_surface_variant" or "error", maxLines = 2 }),
+    ui.label({ text = noctalia.tr("cloud_notice"), fontSize = 12, color = "on_surface_variant" }),
+  }))
+end
+
+local function send(action, value)
+  if busy then return end
+  busy = true
+  render()
+  local accepted = noctalia.runAsync({ python, helper, action, value or "" }, function(result)
+    busy = false
+    local data = noctalia.json.decode(result.stdout)
+    if data then
+      last = data
+      noctalia.state.set("status", data)
+    else
+      last = { ok = false, error = noctalia.tr("unavailable") }
+    end
+    render()
+  end)
+  if not accepted then busy = false; render() end
+end
+
+noctalia.state.watch("status", function(data) last = data; render() end)
+function onOpen() render() end
+function closePanel() panel.close() end
+function refresh() send("refresh") end
+function power(value) send("power", value == "true" and "on" or "off") end
+function screen(value) send("screen", value == "true" and "on" or "off") end
+function cooler() send("temperature", tostring((last.state.targetTemperature or 22) - 1)) end
+function warmer() send("temperature", tostring((last.state.targetTemperature or 22) + 1)) end
+function mode(index) send("mode", modeValues[(tonumber(index) or 0) + 1]) end
+function fan(index) send("fan", fanValues[(tonumber(index) or 0) + 1]) end

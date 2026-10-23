@@ -1,0 +1,10 @@
+This project is not affiliated with TCL, Amazon, or Noctalia.
+
+The TCL Home authentication, discovery and AWS IoT protocol implementation is
+based on and adapted from András Nemes's MIT-licensed Home Assistant integration:
+https://github.com/nemesa/ha-tcl-home-unofficial-integration
+Reference revision: fdba4d7a0b8213f4f68a74b4ce0f932343802b6b
+Copyright (c) 2025 András Nemes
+
+The Noctalia plugin and standalone companion are maintained independently.
+Home Assistant is not required. The applicable MIT notice is in LICENSE.

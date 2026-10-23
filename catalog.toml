@@ -1,0 +1,11 @@
+[[plugin]]
+id = "ggmorais/tcl-control"
+name = "TCL Home AC"
+version = "1.0.0"
+author = "ggmorais"
+license = "MIT"
+icon = "air-conditioning"
+description = "Control a TCL Home split air conditioner from Noctalia."
+plugin_api = 24
+tags = ["smart-home", "air-conditioning", "tcl"]
+dependencies = ["python3"]
