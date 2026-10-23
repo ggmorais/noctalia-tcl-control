@@ -3,6 +3,8 @@
 Noctalia plugin with a Home shortcut, popup controls, bar widget and a standalone
 Python companion for a TCL Home split air conditioner.
 
+![Control panel](screenshot.png)
+
 **Run `sh tcl-control/setup.sh` from a checkout before enabling.** Python packages
 and credentials are stored in user XDG directories, outside the plugin runtime
 copy, so plugin updates do not overwrite them.

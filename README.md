@@ -5,6 +5,8 @@ bar, without Alexa or Home Assistant.
 
 [Português brasileiro](README.pt-BR.md) · [Security](SECURITY.md) · [MIT license](LICENSE)
 
+![TCL Home air conditioner controls inside Noctalia](tcl-control/screenshot.png)
+
 ## Features
 
 - Power, target temperature (16–30 °C), mode, fan speed and AC display controls.
